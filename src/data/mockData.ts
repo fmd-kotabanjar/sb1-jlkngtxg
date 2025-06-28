@@ -9,18 +9,18 @@ export const mockPrompts: Prompt[] = [
     type: 'free',
     category: 'Marketing',
     tags: ['marketing', 'content', 'strategy'],
-    createdBy: 'admin',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-    isActive: true,
-    usage: 1250,
-    rating: 4.8,
-    // Database compatibility fields
     created_by: 'admin',
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-01T00:00:00Z',
     is_active: true,
-    usage_count: 1250
+    usage_count: 1250,
+    rating: 4.8,
+    // Computed properties for compatibility
+    createdBy: 'admin',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    isActive: true,
+    usage: 1250
   },
   {
     id: 'prompt-002',
@@ -30,16 +30,6 @@ export const mockPrompts: Prompt[] = [
     type: 'exclusive',
     category: 'SEO',
     tags: ['seo', 'optimization', 'website'],
-    createdBy: 'admin',
-    createdAt: '2024-01-02T00:00:00Z',
-    updatedAt: '2024-01-02T00:00:00Z',
-    isActive: true,
-    redeemCode: 'SEO2024',
-    lynkUrl: 'https://lynk.id/racikanprompt/seo-advanced',
-    confirmationUrl: 'https://racikanprompt.bincangkecil.com/xonfpro?id=2',
-    usage: 850,
-    rating: 4.9,
-    // Database compatibility fields
     created_by: 'admin',
     created_at: '2024-01-02T00:00:00Z',
     updated_at: '2024-01-02T00:00:00Z',
@@ -47,7 +37,17 @@ export const mockPrompts: Prompt[] = [
     redeem_code: 'SEO2024',
     lynk_url: 'https://lynk.id/racikanprompt/seo-advanced',
     confirmation_url: 'https://racikanprompt.bincangkecil.com/xonfpro?id=2',
-    usage_count: 850
+    usage_count: 850,
+    rating: 4.9,
+    // Computed properties for compatibility
+    createdBy: 'admin',
+    createdAt: '2024-01-02T00:00:00Z',
+    updatedAt: '2024-01-02T00:00:00Z',
+    isActive: true,
+    redeemCode: 'SEO2024',
+    lynkUrl: 'https://lynk.id/racikanprompt/seo-advanced',
+    confirmationUrl: 'https://racikanprompt.bincangkecil.com/xonfpro?id=2',
+    usage: 850
   },
   {
     id: 'prompt-003',
@@ -57,16 +57,6 @@ export const mockPrompts: Prompt[] = [
     type: 'super',
     category: 'E-commerce',
     tags: ['ecommerce', 'customgpt', 'optimization'],
-    createdBy: 'admin',
-    createdAt: '2024-01-03T00:00:00Z',
-    updatedAt: '2024-01-03T00:00:00Z',
-    isActive: true,
-    redeemCode: 'ECOM2024',
-    lynkUrl: 'https://lynk.id/racikanprompt/ecommerce-super',
-    confirmationUrl: 'https://racikanprompt.bincangkecil.com/xonfpro?id=3',
-    usage: 420,
-    rating: 5.0,
-    // Database compatibility fields
     created_by: 'admin',
     created_at: '2024-01-03T00:00:00Z',
     updated_at: '2024-01-03T00:00:00Z',
@@ -74,7 +64,17 @@ export const mockPrompts: Prompt[] = [
     redeem_code: 'ECOM2024',
     lynk_url: 'https://lynk.id/racikanprompt/ecommerce-super',
     confirmation_url: 'https://racikanprompt.bincangkecil.com/xonfpro?id=3',
-    usage_count: 420
+    usage_count: 420,
+    rating: 5.0,
+    // Computed properties for compatibility
+    createdBy: 'admin',
+    createdAt: '2024-01-03T00:00:00Z',
+    updatedAt: '2024-01-03T00:00:00Z',
+    isActive: true,
+    redeemCode: 'ECOM2024',
+    lynkUrl: 'https://lynk.id/racikanprompt/ecommerce-super',
+    confirmationUrl: 'https://racikanprompt.bincangkecil.com/xonfpro?id=3',
+    usage: 420
   },
   {
     id: 'prompt-004',
@@ -84,18 +84,18 @@ export const mockPrompts: Prompt[] = [
     type: 'free',
     category: 'Social Media',
     tags: ['social', 'campaign', 'viral'],
-    createdBy: 'admin',
-    createdAt: '2024-01-04T00:00:00Z',
-    updatedAt: '2024-01-04T00:00:00Z',
-    isActive: true,
-    usage: 980,
-    rating: 4.6,
-    // Database compatibility fields
     created_by: 'admin',
     created_at: '2024-01-04T00:00:00Z',
     updated_at: '2024-01-04T00:00:00Z',
     is_active: true,
-    usage_count: 980
+    usage_count: 980,
+    rating: 4.6,
+    // Computed properties for compatibility
+    createdBy: 'admin',
+    createdAt: '2024-01-04T00:00:00Z',
+    updatedAt: '2024-01-04T00:00:00Z',
+    isActive: true,
+    usage: 980
   },
   {
     id: 'prompt-005',
@@ -105,16 +105,6 @@ export const mockPrompts: Prompt[] = [
     type: 'exclusive',
     category: 'Copywriting',
     tags: ['copywriting', 'sales', 'conversion'],
-    createdBy: 'admin',
-    createdAt: '2024-01-05T00:00:00Z',
-    updatedAt: '2024-01-05T00:00:00Z',
-    isActive: true,
-    redeemCode: 'COPY2024',
-    lynkUrl: 'https://lynk.id/racikanprompt/copywriting-master',
-    confirmationUrl: 'https://racikanprompt.bincangkecil.com/xonfpro?id=5',
-    usage: 650,
-    rating: 4.7,
-    // Database compatibility fields
     created_by: 'admin',
     created_at: '2024-01-05T00:00:00Z',
     updated_at: '2024-01-05T00:00:00Z',
@@ -122,7 +112,17 @@ export const mockPrompts: Prompt[] = [
     redeem_code: 'COPY2024',
     lynk_url: 'https://lynk.id/racikanprompt/copywriting-master',
     confirmation_url: 'https://racikanprompt.bincangkecil.com/xonfpro?id=5',
-    usage_count: 650
+    usage_count: 650,
+    rating: 4.7,
+    // Computed properties for compatibility
+    createdBy: 'admin',
+    createdAt: '2024-01-05T00:00:00Z',
+    updatedAt: '2024-01-05T00:00:00Z',
+    isActive: true,
+    redeemCode: 'COPY2024',
+    lynkUrl: 'https://lynk.id/racikanprompt/copywriting-master',
+    confirmationUrl: 'https://racikanprompt.bincangkecil.com/xonfpro?id=5',
+    usage: 650
   }
 ];
 
@@ -181,6 +181,25 @@ export const mockUsers: User[] = [
     requestQuota: 3,
     usedQuota: 1,
     createdAt: '2024-01-20T00:00:00Z',
+    quotaResetDate: '2024-01-01T00:00:00Z',
+    nextQuotaReset: '2024-02-01T00:00:00Z'
+  },
+  {
+    id: 'demo-user',
+    email: 'demo@racikanprompt.com',
+    name: 'Demo User',
+    role: 'basic',
+    request_quota: 3,
+    used_quota: 0,
+    created_at: '2024-01-01T00:00:00Z',
+    quota_reset_date: '2024-01-01T00:00:00Z',
+    next_quota_reset: '2024-02-01T00:00:00Z',
+    claimedPrompts: [],
+    favoritePrompts: ['prompt-001'],
+    // Computed properties for compatibility
+    requestQuota: 3,
+    usedQuota: 0,
+    createdAt: '2024-01-01T00:00:00Z',
     quotaResetDate: '2024-01-01T00:00:00Z',
     nextQuotaReset: '2024-02-01T00:00:00Z'
   }
