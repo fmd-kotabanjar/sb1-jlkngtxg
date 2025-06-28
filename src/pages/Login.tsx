@@ -24,19 +24,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleDemoLogin = async (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('demo123');
-    setError('');
-    
-    try {
-      await signIn(demoEmail, 'demo123');
-      navigate('/');
-    } catch (err: any) {
-      setError(err.message || 'Demo login failed');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-4 py-8">
       <div className="max-w-md w-full">
@@ -144,33 +131,17 @@ const Login: React.FC = () => {
             </p>
           </div>
 
-          {/* Demo Accounts */}
+          {/* Setup Info */}
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-3">
-                Demo Accounts:
+              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">
+                Setup Supabase:
               </h3>
-              <div className="space-y-2">
-                <button
-                  onClick={() => handleDemoLogin('admin@racikanprompt.com')}
-                  disabled={loading}
-                  className="w-full text-left p-2 bg-white dark:bg-gray-800 rounded border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
-                >
-                  <div className="text-sm">
-                    <div className="font-medium text-blue-900 dark:text-blue-300">Admin Account</div>
-                    <div className="text-blue-700 dark:text-blue-400">admin@racikanprompt.com / demo123</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => handleDemoLogin('demo@racikanprompt.com')}
-                  disabled={loading}
-                  className="w-full text-left p-2 bg-white dark:bg-gray-800 rounded border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
-                >
-                  <div className="text-sm">
-                    <div className="font-medium text-blue-900 dark:text-blue-300">Demo User</div>
-                    <div className="text-blue-700 dark:text-blue-400">demo@racikanprompt.com / demo123</div>
-                  </div>
-                </button>
+              <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                <p>1. Buat project di <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="underline">supabase.com</a></p>
+                <p>2. Copy URL dan Anon Key ke file .env</p>
+                <p>3. Jalankan SQL migration dari folder supabase/</p>
+                <p>4. Buat akun baru atau gunakan yang sudah ada</p>
               </div>
             </div>
           </div>

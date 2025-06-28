@@ -4,7 +4,11 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
+  console.warn('Missing Supabase environment variables. Using fallback configuration.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Use fallback values for development if env vars are not set
+const fallbackUrl = supabaseUrl || 'https://your-project.supabase.co'
+const fallbackKey = supabaseAnonKey || 'your-anon-key'
+
+export const supabase = createClient(fallbackUrl, fallbackKey)

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Prompt } from '../types';
-import PromptCard from '../components/UI/PromptCard';
-import Modal from '../components/UI/Modal';
+import { supabase } from '../lib/supabase';
 import { 
   TrendingUp, 
   Users, 
@@ -14,13 +12,25 @@ import {
   Loader
 } from 'lucide-react';
 
+interface Prompt {
+  id: string;
+  title: string;
+  prompt_text: string;
+  platform: string;
+  category: string;
+  example_image_url?: string;
+  usage_tips?: string;
+  credit_cost: number;
+  is_premium: boolean;
+  created_at: string;
+}
+
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [filteredPrompts, setFilteredPrompts] = useState<Prompt[]>([]);
-  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'free' | 'exclusive' | 'super'>('all');
+  const [filterPlatform, setFilterPlatform] = useState<'all' | 'ChatGPT' | 'CustomGPT' | 'Midjourney'>('all');
   const [filterCategory, setFilterCategory] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -28,31 +38,26 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     loadPrompts();
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     filterPrompts();
-  }, [prompts, searchTerm, filterType, filterCategory]);
+  }, [prompts, searchTerm, filterPlatform, filterCategory]);
 
   const loadPrompts = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Load from localStorage (fallback for when API is not available)
-      const allPrompts = JSON.parse(localStorage.getItem('prompts') || '[]');
-      
-      // Filter prompts based on user role and access
-      const availablePrompts = allPrompts.filter((prompt: Prompt) => {
-        if (prompt.type === 'free') return true;
-        if (user?.role === 'admin') return true;
-        if (user?.role === 'premium' && prompt.type === 'exclusive') return true;
-        if (user?.claimedPrompts.includes(prompt.id)) return true;
-        return false;
-      });
+      const { data, error } = await supabase
+        .from('prompts')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      setPrompts(availablePrompts);
-      console.log('✅ Loaded prompts:', availablePrompts.length);
+      if (error) throw error;
+      
+      setPrompts(data || []);
+      console.log('✅ Loaded prompts:', data?.length || 0);
     } catch (err) {
       console.error('❌ Error loading prompts:', err);
       setError('Failed to load prompts. Please refresh the page.');
@@ -68,14 +73,14 @@ const Dashboard: React.FC = () => {
     if (searchTerm) {
       filtered = filtered.filter(prompt =>
         prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prompt.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prompt.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        prompt.prompt_text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        prompt.category.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // Type filter
-    if (filterType !== 'all') {
-      filtered = filtered.filter(prompt => prompt.type === filterType);
+    // Platform filter
+    if (filterPlatform !== 'all') {
+      filtered = filtered.filter(prompt => prompt.platform === filterPlatform);
     }
 
     // Category filter
@@ -93,15 +98,15 @@ const Dashboard: React.FC = () => {
 
   const getStats = () => {
     const totalPrompts = prompts.length;
-    const favoriteCount = user?.favoritePrompts.length || 0;
-    const claimedCount = user?.claimedPrompts.length || 0;
-    const requestsRemaining = (user?.request_quota || user?.requestQuota || 0) - (user?.used_quota || user?.usedQuota || 0);
+    const freePrompts = prompts.filter(p => !p.is_premium).length;
+    const premiumPrompts = prompts.filter(p => p.is_premium).length;
+    const creditBalance = profile?.credit_balance || 0;
 
     return {
       totalPrompts,
-      favoriteCount,
-      claimedCount,
-      requestsRemaining
+      freePrompts,
+      premiumPrompts,
+      creditBalance
     };
   };
 
@@ -144,7 +149,7 @@ const Dashboard: React.FC = () => {
         {/* Welcome Section */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Selamat datang, {user?.name}!
+            Selamat datang, {profile?.username || user?.email}!
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
             Temukan dan kelola prompt AI terbaik untuk kebutuhan Anda
@@ -173,30 +178,14 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">
-                  Favorit
+                  Gratis
                 </p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  {stats.favoriteCount}
-                </p>
-              </div>
-              <div className="p-2 sm:p-3 bg-red-100 dark:bg-red-900 rounded-lg flex-shrink-0">
-                <Star className="w-4 h-4 sm:w-6 sm:h-6 text-red-600 dark:text-red-400" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">
-                  Diklaim
-                </p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  {stats.claimedCount}
+                  {stats.freePrompts}
                 </p>
               </div>
               <div className="p-2 sm:p-3 bg-green-100 dark:bg-green-900 rounded-lg flex-shrink-0">
-                <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
+                <Star className="w-4 h-4 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </div>
@@ -205,14 +194,30 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">
-                  Kuota Request
+                  Premium
                 </p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  {stats.requestsRemaining}
+                  {stats.premiumPrompts}
                 </p>
               </div>
               <div className="p-2 sm:p-3 bg-purple-100 dark:bg-purple-900 rounded-lg flex-shrink-0">
-                <Users className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
+                <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">
+                  Credit
+                </p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                  {stats.creditBalance}
+                </p>
+              </div>
+              <div className="p-2 sm:p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex-shrink-0">
+                <Users className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-600 dark:text-yellow-400" />
               </div>
             </div>
           </div>
@@ -248,22 +253,22 @@ const Dashboard: React.FC = () => {
           {/* Filters */}
           {showFilters && (
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              {/* Type Filter */}
+              {/* Platform Filter */}
               <div className="flex-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Tipe
+                  Platform
                 </label>
                 <div className="relative">
                   <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value as any)}
+                    value={filterPlatform}
+                    onChange={(e) => setFilterPlatform(e.target.value as any)}
                     className="w-full pl-9 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                   >
-                    <option value="all">Semua Tipe</option>
-                    <option value="free">Gratis</option>
-                    <option value="exclusive">Eksklusif</option>
-                    <option value="super">Super</option>
+                    <option value="all">Semua Platform</option>
+                    <option value="ChatGPT">ChatGPT</option>
+                    <option value="CustomGPT">CustomGPT</option>
+                    <option value="Midjourney">Midjourney</option>
                   </select>
                 </div>
               </div>
@@ -291,12 +296,49 @@ const Dashboard: React.FC = () => {
         {/* Prompts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {filteredPrompts.map((prompt) => (
-            <PromptCard
-              key={prompt.id}
-              prompt={prompt}
-              onFavorite={() => {/* Handle favorite */}}
-              onView={setSelectedPrompt}
-            />
+            <div key={prompt.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden">
+              {/* Header */}
+              <div className="p-4 sm:p-6">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-2 flex-1 min-w-0">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      prompt.is_premium 
+                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                        : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                    }`}>
+                      {prompt.is_premium ? 'PREMIUM' : 'GRATIS'}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {prompt.platform}
+                    </span>
+                  </div>
+                </div>
+
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                  {prompt.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
+                  {prompt.prompt_text.substring(0, 150)}...
+                </p>
+
+                {/* Category */}
+                <div className="flex items-center justify-between mb-4">
+                  <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full">
+                    {prompt.category}
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {prompt.credit_cost} credit
+                  </span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+                  {prompt.is_premium ? 'Gunakan Credit' : 'Gunakan Gratis'}
+                </button>
+              </div>
+            </div>
           ))}
         </div>
 
@@ -312,22 +354,6 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
         )}
-
-        {/* Prompt Detail Modal */}
-        <Modal
-          isOpen={selectedPrompt !== null}
-          onClose={() => setSelectedPrompt(null)}
-          title={selectedPrompt?.title || ''}
-          maxWidth="2xl"
-        >
-          {selectedPrompt && (
-            <PromptCard
-              prompt={selectedPrompt}
-              showContent={true}
-              onFavorite={() => {/* Handle favorite */}}
-            />
-          )}
-        </Modal>
       </div>
     </div>
   );
