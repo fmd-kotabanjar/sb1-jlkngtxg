@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { initializeMockData } from './data/mockData';
-import { initializeDigitalProducts } from './data/digitalProducts';
+import { isSupabaseConfigured } from './lib/supabase';
+import SupabaseSetup from './components/Setup/SupabaseSetup';
 
 // Layout
 import Header from './components/Layout/Header';
@@ -33,8 +33,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 // Admin Route Component
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
-  return user?.role === 'admin' ? <>{children}</> : <Navigate to="/" />;
+  const { user, profile } = useAuth();
+  // Check if user has admin role in user_roles table or is admin in profile
+  return user && (profile?.subscription_tier === 'admin') ? <>{children}</> : <Navigate to="/" />;
 };
 
 // Layout Component
@@ -50,12 +51,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 // Main App Component
 const AppContent: React.FC = () => {
   const { user } = useAuth();
-
-  useEffect(() => {
-    // Initialize mock data on first load
-    initializeMockData();
-    initializeDigitalProducts();
-  }, []);
 
   return (
     <Router>
@@ -82,7 +77,7 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <Layout>
-                {user?.role === 'admin' ? <AdminDashboard /> : <Dashboard />}
+                <Dashboard />
               </Layout>
             </ProtectedRoute>
           } 
@@ -99,7 +94,6 @@ const AppContent: React.FC = () => {
           } 
         />
 
-        {/* Claimed prompts only for basic users */}
         <Route 
           path="/claimed" 
           element={
@@ -111,7 +105,6 @@ const AppContent: React.FC = () => {
           } 
         />
 
-        {/* Redeem code - not for admin */}
         <Route 
           path="/redeem" 
           element={
@@ -145,7 +138,6 @@ const AppContent: React.FC = () => {
           } 
         />
 
-        {/* Upgrade only for non-premium users */}
         <Route 
           path="/upgrade" 
           element={
@@ -221,6 +213,35 @@ const AppContent: React.FC = () => {
 };
 
 function App() {
+  const [showSetup, setShowSetup] = useState(false);
+  const [setupChecked, setSetupChecked] = useState(false);
+
+  useEffect(() => {
+    // Check if Supabase is configured
+    const configured = isSupabaseConfigured();
+    setShowSetup(!configured);
+    setSetupChecked(true);
+  }, []);
+
+  if (!setupChecked) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Checking configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (showSetup) {
+    return (
+      <ThemeProvider>
+        <SupabaseSetup onComplete={() => setShowSetup(false)} />
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider>
       <AuthProvider>
